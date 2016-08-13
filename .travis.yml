@@ -1,0 +1,14 @@
+language: python
+python:
+  - "2.7"
+
+addons:
+  apt:
+    packages:
+    - cmake
+    - pyqt4-dev-tools
+
+# command to install dependencies
+#install: "pip install --user -r requirements.txt"
+# command to run tests
+script: make all
