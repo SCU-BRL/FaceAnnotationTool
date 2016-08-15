@@ -148,6 +148,9 @@ class MainWindow(QMainWindow, WindowMixin):
         openPrevImg = action('&Prev Image', self.openPrevImg,
                 'p', 'prev', u'Open Prev')
 
+        loadFileList = action('&Load FileList', self.scanAllImagesByFile,
+                              'Ctrl+F', 'OpenFile,'u'Open file list')
+
         save = action('&Save', self.saveFile,
                 'Ctrl+S', 'save', u'Save labels to file', enabled=False)
         saveAs = action('&Save As', self.saveFileAs,
@@ -183,6 +186,7 @@ class MainWindow(QMainWindow, WindowMixin):
         showAll = action('&Show\nRectBox', partial(self.togglePolygons, True),
                 'Ctrl+A', 'hide', u'Show all Boxs',
                 enabled=False)
+
 
         zoom = QWidgetAction(self)
         zoom.setDefaultWidget(self.zoomWidget)
@@ -280,7 +284,7 @@ class MainWindow(QMainWindow, WindowMixin):
 
         self.tools = self.toolbar('Tools')
         self.actions.beginner = (
-            open, opendir, openNextImg, openPrevImg, save, None, create, copy, delete, None,
+            open, opendir, openNextImg, openPrevImg, save, loadFileList, None, create, copy, delete, None,
             zoomIn, zoom, zoomOut, fitWindow, fitWidth)
 
         self.actions.advanced = (
@@ -788,14 +792,27 @@ class MainWindow(QMainWindow, WindowMixin):
         return images
 
     # load all images by list file
-    def scanAllImagesByFile(self,filePath):
+    def scanAllImagesByFile(self):
+        if not self.mayContinue():
+            return
+        path = os.path.dirname(unicode(self.filename))\
+                if self.filename else '.'
+
+        filename = unicode(QFileDialog.getOpenFileName(self,
+            '%s - Choose Image List File' % __appname__, path, QString()))
+
         images = []
-        if os.path.exists(filePath):
-            fp = open(filePath,'r')
-            images = fp.readlines()
+        if os.path.exists(filename):
+            fp = open(filename,'r')
+            lines = fp.readlines()
+            for line in lines:
+                images.append(line.strip())
+            images.sort(key=lambda x: x.lower())
         else:
             print 'File list not exist.'
-        return images
+        self.dirname = path
+        self.mImgList = images
+        self.openNextImg()
 
     def changeSavedir(self, _value=False):
         if self.defaultSaveDir is not None:
@@ -813,7 +830,7 @@ class MainWindow(QMainWindow, WindowMixin):
         self.statusBar().showMessage('%s . Annotation will be saved to %s' %('Change saved folder', self.defaultSaveDir))
         self.statusBar().show()
 
-    # Open XML annotation file,
+    # Open XML annotation file
     def openAnnotation(self, _value=False):
         # image file can not be empty.
         if self.filename is None:
@@ -835,6 +852,7 @@ class MainWindow(QMainWindow, WindowMixin):
             #   '%s - Choose a xml file' % __appname__, path, filters))
             self.loadPascalXMLByFilename(txtFilename)
 #
+
     def openDir(self, _value=False):
         if not self.mayContinue():
             return
@@ -1062,6 +1080,7 @@ class MainWindow(QMainWindow, WindowMixin):
         tVocParseReader = PascalVocReader(filename)
         shapes = tVocParseReader.getShapes()
         self.loadLabels(shapes)
+
 
 class Settings(object):
     """Convenience dict-like wrapper around QSettings."""

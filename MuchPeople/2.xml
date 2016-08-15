@@ -1,14 +1,14 @@
 <?xml version="1.0" ?>
 <annotation>
 	<folder>MuchPeople</folder>
-	<filename>1</filename>
-	<path>E:\LocalProject\FaceAnnotationTool\MuchPeople\1.jpg</path>
+	<filename>2</filename>
+	<path>E:\LocalProject\FaceAnnotationTool\MuchPeople\2.jpg</path>
 	<source>
 		<database>Unknown</database>
 	</source>
 	<size>
-		<width>2048</width>
-		<height>1217</height>
+		<width>4646</width>
+		<height>1800</height>
 		<depth>3</depth>
 	</size>
 	<segmented>0</segmented>
@@ -18,10 +18,10 @@
 		<truncated>0</truncated>
 		<difficult>0</difficult>
 		<bndbox>
-			<x>625</x>
-			<y>402</y>
-			<width>143</width>
-			<height>143</height>
+			<x>1523</x>
+			<y>655</y>
+			<width>231</width>
+			<height>231</height>
 		</bndbox>
 	</object>
 	<object>
@@ -30,10 +30,10 @@
 		<truncated>0</truncated>
 		<difficult>0</difficult>
 		<bndbox>
-			<x>969</x>
-			<y>496</y>
-			<width>140</width>
-			<height>140</height>
+			<x>2322</x>
+			<y>564</y>
+			<width>435</width>
+			<height>435</height>
 		</bndbox>
 	</object>
 </annotation>
