@@ -61,3 +61,10 @@ def fmtShortcut(text):
     mod, key = text.split('+', 1)
     return '<b>%s</b>+<b>%s</b>' % (mod, key)
 
+def sign(x):
+    if x <0:
+        return -1
+    elif x>0:
+        return 1
+    else:
+        return 0

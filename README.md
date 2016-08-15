@@ -67,7 +67,7 @@ You can edit the [data/predefined_classes.txt](https://github.com/tzutalin/label
 
 * Ctrl + r : Change the defult target dir which saving annotation files
 
-* Ctrl + n : Create a bounding box
+* c : Create a bounding box
 
 * Ctrl + s : Save
 

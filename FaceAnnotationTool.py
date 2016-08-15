@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf8 -*-
 
+# init self class
 import _init_path
 import os.path
 import re
@@ -160,12 +161,12 @@ class MainWindow(QMainWindow, WindowMixin):
                 'Ctrl+Shift+L', 'color', u'Choose Box fill color')
 
         createMode = action('Create\nRectBox', self.setCreateMode,
-                'c', 'new', u'Start drawing Boxs', enabled=False)
+                'Ctrl+M', 'new', u'Start drawing Boxs', enabled=False)
         editMode = action('&Edit\nRectBox', self.setEditMode,
                 'Ctrl+J', 'edit', u'Move and edit Boxs', enabled=False)
 
         create = action('Create\nRectBox', self.createShape,
-                'Ctrl+N', 'new', u'Draw a new Box', enabled=False)
+                'Ctrl+C', 'new', u'Draw a new Box', enabled=False)
         delete = action('Delete\nRectBox', self.deleteSelectedShape,
                 'Delete', 'delete', u'Delete', enabled=False)
         copy = action('&Duplicate\nRectBox', self.copySelectedShape,
@@ -550,7 +551,7 @@ class MainWindow(QMainWindow, WindowMixin):
                         points=[(p.x(), p.y()) for p in s.points])
 
         shapes = [format_shape(shape) for shape in self.canvas.shapes]
-        # Can add differrent annotation formats here
+        # Can add different annotation formats here
         try:
             if self.usingPascalVocFormat is True:
                 print 'savePascalVocFormat save to:' + filename
@@ -773,7 +774,7 @@ class MainWindow(QMainWindow, WindowMixin):
         if self.mayContinue():
             self.loadFile(filename)
 
-# load all images in this folder
+    # load all images in this folder
     def scanAllImages(self, folderPath):
         extensions = {'.jpeg','.jpg', '.png', '.bmp'}
         images = []
@@ -784,6 +785,16 @@ class MainWindow(QMainWindow, WindowMixin):
                     relativePath = os.path.join(root, file)
                     images.append(os.path.abspath(relativePath))
         images.sort(key=lambda x: x.lower())
+        return images
+
+    # load all images by list file
+    def scanAllImagesByFile(self,filePath):
+        images = []
+        if os.path.exists(filePath):
+            fp = open(filePath,'r')
+            images = fp.readlines()
+        else:
+            print 'File list not exist.'
         return images
 
     def changeSavedir(self, _value=False):
@@ -802,7 +813,7 @@ class MainWindow(QMainWindow, WindowMixin):
         self.statusBar().showMessage('%s . Annotation will be saved to %s' %('Change saved folder', self.defaultSaveDir))
         self.statusBar().show()
 
-# Open XML annotation file,
+    # Open XML annotation file,
     def openAnnotation(self, _value=False):
         # image file can not be empty.
         if self.filename is None:
@@ -845,7 +856,7 @@ class MainWindow(QMainWindow, WindowMixin):
         self.mImgList = self.scanAllImages(dirpath)
         self.openNextImg()
 
-# Open prev image, should load annotation xml file
+    # Open prev image, should load annotation xml file
     def openPrevImg(self, _value=False):
         if not self.mayContinue():
             return
@@ -864,7 +875,7 @@ class MainWindow(QMainWindow, WindowMixin):
                 # if have label, load this annotation.
                 self.openAnnotation(self)
 
-# Open prev image, if have annotation should load annotation xml file.
+    # Open prev image, if have annotation should load annotation xml file.
     def openNextImg(self, _value=False):
         # Proceding next image without dialog if having any label
         if self.autoSaving is True and self.defaultSaveDir is not None:
@@ -1077,7 +1088,6 @@ class Settings(object):
             return method(value)
         return value
 
-
 def inverted(color):
     return QColor(*[255 - v for v in color.getRgb()])
 
@@ -1088,15 +1098,17 @@ def read(filename, default=None):
     except:
         return default
 
+
 def main(argv):
     """Standard boilerplate Qt application code."""
-    # TODO
-    # 1、框都为正方形
+
+    # 1、框都为正方形【完成】
     # 2、根据图片名称找到相应的XML文件，将画完的框复现【完成】
     # 3、设置默认的目标类别【完成】
-    # 4、在画框的时候将输入角度信息
-    # 5、显示框的坐标和长宽
-    # 6、根据文件列表来读取文件，并且设置默认label存储路径
+    # TODO
+    # 1、在画框的时候将输入角度信息
+    # 2、显示框的坐标和长宽
+    # 3、根据文件列表来读取文件，并且设置默认label存储路径
 
     app = QApplication(argv)
     app.setApplicationName(__appname__)

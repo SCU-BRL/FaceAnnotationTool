@@ -3,7 +3,7 @@ from PyQt4.QtCore import *
 #from PyQt4.QtOpenGL import *
 
 from shape import Shape
-from lib import distance
+from lib import distance,sign
 
 CURSOR_DEFAULT = Qt.ArrowCursor
 CURSOR_POINT   = Qt.PointingHandCursor
@@ -27,14 +27,16 @@ class Canvas(QWidget):
     def __init__(self, *args, **kwargs):
         super(Canvas, self).__init__(*args, **kwargs)
         # Initialise local state.
-        self.mode = self.EDIT
-        self.rect = []
-        self.shapes = []
-        self.current = None
+        self.mode = self.EDIT   #
+        self.rect = []          # save final face bbox
+        self.shapes = []        # label and four vertex
+        self.current = None     #
         self.selectedShape=None # save the selected shape here
         self.selectedShapeCopy=None
+        # render line
         self.lineColor = QColor(0, 0, 255)
         self.line = Shape(line_color=self.lineColor)
+
         self.prevPoint = QPointF()
         self.offsets = QPointF(), QPointF()
         self.scale = 1.0
@@ -106,7 +108,11 @@ class Canvas(QWidget):
                     color = self.current.line_color
                     self.overrideCursor(CURSOR_POINT)
                     self.current.highlightVertex(0, Shape.NEAR_VERTEX)
-                self.line[1] = pos
+                # only create square shape
+                initPos = self.current[0]
+                offSet = min(pos.x() - initPos.x(),pos.y()-initPos.y())
+                #self.line[1] = pos
+                self.line[1] = initPos + QPointF(offSet,offSet)
                 self.line.line_color = color
                 self.repaint()
                 self.current.highlightClear()
@@ -136,7 +142,7 @@ class Canvas(QWidget):
                 self.repaint()
             return
 
-        # Just hovering over the canvas, 2 posibilities:
+        # Just hovering over the canvas, 2 possibilities:
         # - Highlight shapes
         # - Highlight vertex
         # Update shape/vertex fill and tooltip value accordingly.
@@ -186,14 +192,15 @@ class Canvas(QWidget):
                     self.current.addPoint(targetPos)
                     self.current.addPoint(QPointF(minX, maxY))
                     self.current.addPoint(initPos)
+
                     # capture square
-                    side = min(maxX-minX,maxY-minY)
-                    self.rect = [minX,minY,side,side]
+                    # side = min(maxX-minX,maxY-minY)
+                    # self.rect = [minX,minY,side,side]
 
                     self.line[0] = self.current[-1]
                     if self.current.isClosed():
                         self.finalise()
-                elif not self.outOfPixmap(pos):
+                elif not self.outOfPixmap(pos): # create bbox the first point
                     self.current = Shape()
                     self.current.addPoint(pos)
                     self.line.points = [pos, pos]
@@ -290,27 +297,38 @@ class Canvas(QWidget):
         y2 = (rect.y() + rect.height()) - point.y()
         self.offsets = QPointF(x1, y1), QPointF(x2, y2)
 
+    # change bbox by change vertex, only change square shape
+    # index of right bottom point is zero
     def boundedMoveVertex(self, pos):
         index, shape = self.hVertex, self.hShape
         point = shape[index]
         if self.outOfPixmap(pos):
             pos = self.intersectionPoint(point, pos)
 
-        shiftPos = pos - point
-        shape.moveVertexBy(index, shiftPos)
+        print index
+        #shiftPos = pos - point
 
-        lindex = (index + 1) % 4
-        rindex = (index + 3) % 4
+        rindex = (index + 1) % 4
+        lindex = (index + 3) % 4
         lshift = None
         rshift = None
-        if index % 2 == 0:
+        if index % 2 == 0: # same direct change
+            offSide = min(pos.x() - point.x(), pos.y() - point.y())
+            shiftPos = QPointF(offSide,offSide)
+            shape.moveVertexBy(index, shiftPos)
             rshift = QPointF(shiftPos.x(), 0)
             lshift = QPointF(0, shiftPos.y())
-        else:
-            lshift = QPointF(shiftPos.x(), 0)
-            rshift = QPointF(0, shiftPos.y())
-        shape.moveVertexBy(rindex, rshift)
-        shape.moveVertexBy(lindex, lshift)
+            shape.moveVertexBy(rindex, rshift)
+            shape.moveVertexBy(lindex, lshift)
+        # else:              # different direct change
+        #     absOffSide = min(abs(pos.x() - point.x()), abs(pos.y() - point.y()))
+        #     shiftPos = QPointF(absOffSide * sign(pos.x() - point.x()), absOffSide * sign(pos.y() - point.y()))
+        #     #shiftPos = QPointF(absOffSide,absOffSide)
+        #     shape.moveVertexBy(index, shiftPos)
+        #     lshift = QPointF(shiftPos.x(), 0)
+        #     rshift = QPointF(0, shiftPos.y())
+
+
 
     def boundedMoveShape(self, shape, pos):
         if self.outOfPixmap(pos):

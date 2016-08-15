@@ -62,10 +62,10 @@ class PascalVocWriter:
 
         return top
 
-    def addBndBox(self, xmin, ymin, xmax, ymax, name):
-        bndbox = {'xmin':xmin, 'ymin':ymin, 'xmax':xmax, 'ymax':ymax}
+    def addBndBox(self, x, y, width, height, name):
+        bndbox = {'x':x, 'y':y, 'width':width, 'height':height}
         bndbox['name'] = name
-        self.boxlist.append(bndbox);
+        self.boxlist.append(bndbox)
 
     def appendObjects(self, top):
         for each_object in self.boxlist:
@@ -79,14 +79,15 @@ class PascalVocWriter:
             difficult = SubElement(object_item, 'difficult')
             difficult.text = "0"
             bndbox = SubElement(object_item, 'bndbox')
-            xmin = SubElement(bndbox, 'xmin')
-            xmin.text = str(each_object['xmin'])
-            ymin = SubElement(bndbox, 'ymin')
-            ymin.text = str(each_object['ymin'])
-            xmax = SubElement(bndbox, 'xmax')
-            xmax.text = str(each_object['xmax'])
-            ymax = SubElement(bndbox, 'ymax')
-            ymax.text = str(each_object['ymax'])
+            x = SubElement(bndbox, 'x')
+            x.text = str(each_object['x'])
+            y = SubElement(bndbox, 'y')
+            y.text = str(each_object['y'])
+            width = SubElement(bndbox, 'width')
+            width.text = str(each_object['width'])
+            height = SubElement(bndbox, 'height')
+            height.text = str(each_object['height'])
+
 
     def save(self, targetFile = None):
         root = self.genXML()
@@ -114,11 +115,11 @@ class PascalVocReader:
         return self.shapes
 
     def addShape(self, label, rect):
-        xmin = rect[0]
-        ymin = rect[1]
-        xmax = rect[2]
-        ymax = rect[3]
-        points = [(xmin,ymin), (xmin,ymax), (xmax, ymax), (xmax, ymin)]
+        x = rect[0]
+        y = rect[1]
+        width = rect[2]
+        height = rect[3]
+        points = [(x,y), (x,y+height), (x+width, y+height), (x+width, y)]
         self.shapes.append((label, points, None, None))
 
     def parseXML(self):

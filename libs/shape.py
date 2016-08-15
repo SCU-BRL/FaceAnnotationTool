@@ -146,6 +146,7 @@ class Shape(object):
     def moveBy(self, offset):
         self.points = [p + offset for p in self.points]
 
+
     def moveVertexBy(self, i, offset):
         self.points[i] = self.points[i] + offset
 
