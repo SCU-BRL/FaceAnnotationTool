@@ -128,23 +128,23 @@ class PascalVocReader:
         filename = xmltree.find('filename').text
 
         for object_iter in xmltree.findall('object'):
-           rects = []
-           bndbox = object_iter.find("bndbox")
-           rects.append([int(it.text) for it in bndbox])
-           label = object_iter.find('name').text
+            rects = []
+            bndbox = object_iter.find("bndbox")
+            rects.append([int(it.text) for it in bndbox])
+            label = object_iter.find('name').text
 
-           for rect in rects:
-               self.addShape(label, rect)
+            for rect in rects:
+                self.addShape(label, rect)
         return True
 
 
 # tempParseReader = PascalVocReader('test.xml')
-# print tempParseReader.getShapes()
-"""
+# shape = tempParseReader.getShapes()
+# print shape
+
 # Test
-tmp = PascalVocWriter('temp','test', (10,20,3))
-tmp.addBndBox(10,10,20,30,'chair')
-tmp.addBndBox(1,1,600,600,'car')
-tmp.save()
-"""
+# tmp = PascalVocWriter('temp','test', (10,20,3))
+# tmp.addBndBox(10,10,20,30,'chair')
+# tmp.addBndBox(1,1,600,600,'car')
+# tmp.save()
 

@@ -54,7 +54,8 @@ class MainWindow(QMainWindow, WindowMixin):
         super(MainWindow, self).__init__()
         self.setWindowTitle(__appname__)
         # Save as Pascal voc xml
-        self.defaultSaveDir = None
+        # Set the defaultSaveDir save labels
+        self.defaultSaveDir = 'E:\Multi-Pie\Labels\\'
         self.usingPascalVocFormat = True
         if self.usingPascalVocFormat:
             LabelFile.suffix = '.xml'
@@ -699,12 +700,17 @@ class MainWindow(QMainWindow, WindowMixin):
             self.addRecentFile(self.filename)
             self.toggleActions(True)
 
-            ## Label xml file and show bound box according to its filename
-            if self.usingPascalVocFormat is True and \
-                    self.defaultSaveDir is not None:
-                    basename = os.path.basename(os.path.splitext(self.filename)[0])
+            ## Label xml or txt file and show bound box according to its filename
+            basename = os.path.basename(os.path.splitext(self.filename)[0])
+            if self.defaultSaveDir is not None:
+                if self.usingPascalVocFormat is True:
                     xmlPath = os.path.join(self.defaultSaveDir, basename + '.xml')
                     self.loadPascalXMLByFilename(xmlPath)
+                else:
+                    basename = os.path.basename(os.path.splitext(self.filename)[0])
+                    txtPath = os.path.join(self.defaultSaveDir, basename + '.txt')
+                    self.loadTXTByFilename(txtPath)
+
 
             return True
         return False
@@ -939,6 +945,9 @@ class MainWindow(QMainWindow, WindowMixin):
                 print 'handle the image:' + self.filename
                 imgFileName = os.path.basename(self.filename)
                 savedFileName = os.path.splitext(imgFileName)[0] + LabelFile.suffix
+                # if such dir is not exist, create it.
+                if os.path.exists(self.defaultSaveDir) is False:
+                    os.makedirs(self.defaultSaveDir)
                 savedPath = os.path.join(str(self.defaultSaveDir), savedFileName)
                 self._saveFile(savedPath)
             else:
@@ -1081,6 +1090,16 @@ class MainWindow(QMainWindow, WindowMixin):
         shapes = tVocParseReader.getShapes()
         self.loadLabels(shapes)
 
+    def loadTXTByFilename(self,filename):
+        if self.filename is None:
+            return
+        if os.path.exists(filename) is False:
+            return
+        shapes = self.getShapes(filename)
+        self.loadLabels(shapes)
+
+    #def getShapes(self,filename):
+
 
 class Settings(object):
     """Convenience dict-like wrapper around QSettings."""
@@ -1124,10 +1143,11 @@ def main(argv):
     # 1、框都为正方形【完成】
     # 2、根据图片名称找到相应的XML文件，将画完的框复现【完成】
     # 3、设置默认的目标类别【完成】
+    # 4、根据文件列表来读取文件，并且设置默认label存储路径【完成】
     # TODO
-    # 1、在画框的时候将输入角度信息
-    # 2、显示框的坐标和长宽
-    # 3、根据文件列表来读取文件，并且设置默认label存储路径
+    # 5、在画框的时候将输入角度信息
+    # 6、显示框的坐标和长宽
+    # 7、修改pascal读入读出的格式
 
     app = QApplication(argv)
     app.setApplicationName(__appname__)
