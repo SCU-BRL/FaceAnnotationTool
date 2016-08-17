@@ -28,7 +28,7 @@ class LabelFile(object):
                 imageData = b64decode(data['imageData'])
                 lineColor = data['lineColor']
                 fillColor = data['fillColor']
-                shapes = ((s['label'], s['points'], s['line_color'], s['fill_color'])\
+                shapes = ((s['label'], s['points'], s['pose'],s['line_color'], s['fill_color'])\
                         for s in data['shapes'])
                 # Only replace data after everything is loaded.
                 self.shapes = shapes
@@ -52,7 +52,7 @@ class LabelFile(object):
         except Exception, e:
             raise LabelFileError(e)
 
-    def savePascalVocFormat(self, filename, shapes, imagePath, imageData, pose ,lineColor=None, fillColor=None, databaseSrc=None):
+    def savePascalVocFormat(self, filename, shapes, imagePath, imageData ,lineColor=None, fillColor=None, databaseSrc=None):
         imgFolderPath = os.path.dirname(imagePath)
         imgFolderName = os.path.split(imgFolderPath)[-1]
         imgFileName = os.path.basename(imagePath)
@@ -60,13 +60,14 @@ class LabelFile(object):
 
         img = cv2.imread(imagePath)
         imageShape = img.shape
-        writer = PascalVocWriter(imgFolderName, imgFileNameWithoutExt, imageShape, pose ,localImgPath=imagePath)
+        writer = PascalVocWriter(imgFolderName, imgFileNameWithoutExt, imageShape ,localImgPath=imagePath)
         bSave = False
         for shape in shapes:
             points = shape['points']
             label = shape['label']
+            pose = shape['pose']
             bndbox = LabelFile.convertPoints2BndBox(points)
-            writer.addBndBox(bndbox[0], bndbox[1], bndbox[2], bndbox[3], label)
+            writer.addBndBox(bndbox[0], bndbox[1], bndbox[2], bndbox[3], label, pose)
             bSave = True
 
         if bSave:
@@ -100,5 +101,5 @@ class LabelFile(object):
 
         if (ymin < 1):
             ymin = 1
-        # return format is x y w h
+        # return format is x y w h, ensure rect is square
         return (int(xmin), int(ymin), int(xmax-xmin), int(ymax-ymin))

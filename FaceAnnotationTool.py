@@ -55,7 +55,7 @@ class MainWindow(QMainWindow, WindowMixin):
         self.setWindowTitle(__appname__)
         # Save as Pascal voc xml
         # Set the defaultSaveDir save labels
-        self.defaultSaveDir = 'E:\Multi-Pie\Labels\\'
+        self.defaultSaveDir = 'E:\FaceDetectionBenchmark\AFLW\Data\\leftProfileLabel\\'
         self.usingPascalVocFormat = True
         if self.usingPascalVocFormat:
             LabelFile.suffix = '.xml'
@@ -64,8 +64,6 @@ class MainWindow(QMainWindow, WindowMixin):
         self.dirname = None
         self.labelHist = []
         self.lastOpenDir = None
-
-        self.pose = []
 
         # Whether we need to save or not.
         self.dirty = False
@@ -172,7 +170,7 @@ class MainWindow(QMainWindow, WindowMixin):
                 'Ctrl+J', 'edit', u'Move and edit Boxs', enabled=False)
 
         create = action('Create\nRectBox', self.createShape,
-                'Ctrl+C', 'new', u'Draw a new Box', enabled=False)
+                'c', 'new', u'Draw a new Box', enabled=False)
         delete = action('Delete\nRectBox', self.deleteSelectedShape,
                 'Delete', 'delete', u'Delete', enabled=False)
         copy = action('&Duplicate\nRectBox', self.copySelectedShape,
@@ -516,8 +514,9 @@ class MainWindow(QMainWindow, WindowMixin):
         self.actions.shapeFillColor.setEnabled(selected)
         print 'shapeSelectionChanged'
 
+    # add Label and Pose into Windows
     def addLabel(self, shape):
-        item = QListWidgetItem(shape.label+" " + str(self.pose))  # Show rect class and pose
+        item = QListWidgetItem(shape.label+" " + str(shape.pose))  # Show rect class and pose
         item.setFlags(item.flags() | Qt.ItemIsUserCheckable)
         item.setCheckState(Qt.Checked)
 
@@ -533,16 +532,15 @@ class MainWindow(QMainWindow, WindowMixin):
         del self.shapesToItems[shape]
         del self.itemsToShapes[item]
 
-    # load label,rect,pose info
+    # load label,rect, pose info
     def loadLabels(self, shapes):
         s = []
         for label, points, pose ,line_color, fill_color in shapes:
-            shape = Shape(label=label)
+            shape = Shape(label=label,pose=pose)
             for x, y in points:
                 shape.addPoint(QPointF(x, y))
             shape.close()
             s.append(shape)
-            self.pose = pose
             self.addLabel(shape)
             if line_color:
                 shape.line_color = QColor(*line_color)
@@ -553,19 +551,18 @@ class MainWindow(QMainWindow, WindowMixin):
     def saveLabels(self, filename):
         lf = LabelFile()
         def format_shape(s):
-            return dict(label=unicode(s.label),
+            return dict(label=unicode(s.label), pose = s.pose,
                         line_color=s.line_color.getRgb()\
                                 if s.line_color != self.lineColor else None,
                         fill_color=s.fill_color.getRgb()\
                                 if s.fill_color != self.fillColor else None,
                         points=[(p.x(), p.y()) for p in s.points])
-
         shapes = [format_shape(shape) for shape in self.canvas.shapes]
         # Can add different annotation formats here
         try:
             if self.usingPascalVocFormat is True:
                 print 'savePascalVocFormat save to:' + filename
-                lf.savePascalVocFormat(filename, shapes, unicode(self.filename), self.imageData,self.pose,
+                lf.savePascalVocFormat(filename, shapes, unicode(self.filename), self.imageData,
                     self.lineColor.getRgb(), self.fillColor.getRgb())
             else:
                 lf.save(filename, shapes, unicode(self.filename), self.imageData,
@@ -599,7 +596,7 @@ class MainWindow(QMainWindow, WindowMixin):
             self.canvas.setShapeVisible(shape, item.checkState() == Qt.Checked)
 
     ## Callback functions:
-    #  labelHist only need face class
+    #  labelHist only need face class, add pose info into shapes
     def newShape(self):
         """Pop-up and give focus to the label editor.
 
@@ -610,11 +607,11 @@ class MainWindow(QMainWindow, WindowMixin):
         # text = self.labelDialog.popUp()
         # use default class
         # get face pose info pitch, yaw, roll
-        self.pose = LabelDialog(parent=self).popUp()
 
+        pose = LabelDialog(parent=self).popUp()
         text = self.labelHist[0]
         if text is not None:
-            self.addLabel(self.canvas.setLastLabel(text))
+            self.addLabel(self.canvas.setLastLabel(text,pose))
             if self.beginner(): # Switch to edit mode.
                 self.canvas.setEditing(True)
                 self.actions.create.setEnabled(True)

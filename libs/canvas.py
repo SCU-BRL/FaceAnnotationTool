@@ -29,7 +29,7 @@ class Canvas(QWidget):
         # Initialise local state.
         self.mode = self.EDIT   #
         self.rect = []          # save final face bbox
-        self.shapes = []        # label and four vertex
+        self.shapes = []        # label and four vertex add pose
         self.current = None     #
         self.selectedShape=None # save the selected shape here
         self.selectedShapeCopy=None
@@ -539,9 +539,11 @@ class Canvas(QWidget):
         elif key == Qt.Key_Return and self.canCloseShape():
             self.finalise()
 
-    def setLastLabel(self, text):
-        assert text
-        self.shapes[-1].label = text
+    # add label info and pose info into shapes
+    def setLastLabel(self, label, pose):
+        assert label,pose
+        self.shapes[-1].label = label
+        self.shapes[-1].pose = pose
         return self.shapes[-1]
 
     def undoLastLine(self):

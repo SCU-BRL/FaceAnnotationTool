@@ -1,0 +1,39 @@
+<?xml version="1.0" ?>
+<annotation>
+	<folder>temp</folder>
+	<filename>test</filename>
+	<path/>
+	<source>
+		<database>Unknown</database>
+	</source>
+	<size>
+		<width>20</width>
+		<height>10</height>
+		<depth>3</depth>
+	</size>
+	<segmented>0</segmented>
+	<object>
+		<name>chair</name>
+		<pose>&lt;Element 'pose' at 0x45dc828&gt;</pose>
+		<truncated>0</truncated>
+		<difficult>0</difficult>
+		<bndbox>
+			<x>10</x>
+			<y>10</y>
+			<width>20</width>
+			<height>30</height>
+		</bndbox>
+	</object>
+	<object>
+		<name>car</name>
+		<pose>&lt;Element 'pose' at 0x45dca58&gt;</pose>
+		<truncated>0</truncated>
+		<difficult>0</difficult>
+		<bndbox>
+			<x>1</x>
+			<y>1</y>
+			<width>600</width>
+			<height>600</height>
+		</bndbox>
+	</object>
+</annotation>

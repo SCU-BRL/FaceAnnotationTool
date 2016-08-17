@@ -5,14 +5,13 @@ from xml.dom import minidom
 from lxml import etree
 
 class PascalVocWriter:
-    def __init__(self, foldername, filename, imgSize, pose ,databaseSrc='Unknown', localImgPath=None):
+    def __init__(self, foldername, filename, imgSize ,databaseSrc='Unknown', localImgPath=None):
         self.foldername = foldername
         self.filename = filename
         self.databaseSrc = databaseSrc
         self.imgSize = imgSize
         self.boxlist = []
         self.localImgPath = localImgPath
-        self.pose = pose
 
     def prettify(self, elem):
         """
@@ -63,9 +62,10 @@ class PascalVocWriter:
 
         return top
 
-    def addBndBox(self, x, y, width, height, name):
+    def addBndBox(self, x, y, width, height, name, pose):
         bndbox = {'x':x, 'y':y, 'width':width, 'height':height}
         bndbox['name'] = name
+        bndbox['pose'] = pose
         self.boxlist.append(bndbox)
 
     def appendObjects(self, top):
@@ -74,7 +74,7 @@ class PascalVocWriter:
             name = SubElement(object_item, 'name')
             name.text = str(each_object['name'])
             pose = SubElement(object_item, 'pose')
-            pose.text = str(self.pose)
+            pose.text = str(each_object['pose'])
             truncated = SubElement(object_item, 'truncated')
             truncated.text = "0"
             difficult = SubElement(object_item, 'difficult')
@@ -145,8 +145,8 @@ class PascalVocReader:
 # print shape
 
 # Test
-# tmp = PascalVocWriter('temp','test', (10,20,3))
-# tmp.addBndBox(10,10,20,30,'chair')
-# tmp.addBndBox(1,1,600,600,'car')
+# tmp = PascalVocWriter('temp','test', (10,20,3),'0 0 0')
+# tmp.addBndBox(10,10,20,30,'chair','0 90 0')
+# tmp.addBndBox(1,1,600,600,'car','9 0 0')
 # tmp.save()
 
