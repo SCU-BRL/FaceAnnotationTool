@@ -5,13 +5,14 @@ from xml.dom import minidom
 from lxml import etree
 
 class PascalVocWriter:
-    def __init__(self, foldername, filename, imgSize, databaseSrc='Unknown', localImgPath=None):
+    def __init__(self, foldername, filename, imgSize, pose ,databaseSrc='Unknown', localImgPath=None):
         self.foldername = foldername
         self.filename = filename
         self.databaseSrc = databaseSrc
         self.imgSize = imgSize
         self.boxlist = []
         self.localImgPath = localImgPath
+        self.pose = pose
 
     def prettify(self, elem):
         """
@@ -73,7 +74,7 @@ class PascalVocWriter:
             name = SubElement(object_item, 'name')
             name.text = str(each_object['name'])
             pose = SubElement(object_item, 'pose')
-            pose.text = "Unspecified"
+            pose.text = str(self.pose)
             truncated = SubElement(object_item, 'truncated')
             truncated.text = "0"
             difficult = SubElement(object_item, 'difficult')
@@ -114,13 +115,13 @@ class PascalVocReader:
     def getShapes(self):
         return self.shapes
 
-    def addShape(self, label, rect):
+    def addShape(self, label, rect, pose):
         x = rect[0]
         y = rect[1]
         width = rect[2]
         height = rect[3]
         points = [(x,y), (x,y+height), (x+width, y+height), (x+width, y)]
-        self.shapes.append((label, points, None, None))
+        self.shapes.append((label, points, pose, None, None))
 
     def parseXML(self):
         assert self.filepath.endswith('.xml'), "Unsupport file format"
@@ -132,9 +133,10 @@ class PascalVocReader:
             bndbox = object_iter.find("bndbox")
             rects.append([int(it.text) for it in bndbox])
             label = object_iter.find('name').text
+            pose = object_iter.find('pose').text
 
             for rect in rects:
-                self.addShape(label, rect)
+                self.addShape(label, rect, pose)
         return True
 
 

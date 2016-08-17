@@ -318,8 +318,8 @@ class Canvas(QWidget):
             shape.moveVertexBy(index, shiftPos)
             rshift = QPointF(shiftPos.x(), 0)
             lshift = QPointF(0, shiftPos.y())
-            shape.moveVertexBy(rindex, rshift)
-            shape.moveVertexBy(lindex, lshift)
+            shape.moveVertexBy(rindex, lshift)
+            shape.moveVertexBy(lindex, rshift)
         # else:              # different direct change
         #     absOffSide = min(abs(pos.x() - point.x()), abs(pos.y() - point.y()))
         #     shiftPos = QPointF(absOffSide * sign(pos.x() - point.x()), absOffSide * sign(pos.y() - point.y()))

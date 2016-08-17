@@ -65,6 +65,8 @@ class MainWindow(QMainWindow, WindowMixin):
         self.labelHist = []
         self.lastOpenDir = None
 
+        self.pose = []
+
         # Whether we need to save or not.
         self.dirty = False
 
@@ -515,9 +517,10 @@ class MainWindow(QMainWindow, WindowMixin):
         print 'shapeSelectionChanged'
 
     def addLabel(self, shape):
-        item = QListWidgetItem(shape.label)
+        item = QListWidgetItem(shape.label+" " + str(self.pose))  # Show rect class and pose
         item.setFlags(item.flags() | Qt.ItemIsUserCheckable)
         item.setCheckState(Qt.Checked)
+
         self.itemsToShapes[item] = shape
         self.shapesToItems[shape] = item
         self.labelList.addItem(item)
@@ -530,14 +533,16 @@ class MainWindow(QMainWindow, WindowMixin):
         del self.shapesToItems[shape]
         del self.itemsToShapes[item]
 
+    # load label,rect,pose info
     def loadLabels(self, shapes):
         s = []
-        for label, points, line_color, fill_color in shapes:
+        for label, points, pose ,line_color, fill_color in shapes:
             shape = Shape(label=label)
             for x, y in points:
                 shape.addPoint(QPointF(x, y))
             shape.close()
             s.append(shape)
+            self.pose = pose
             self.addLabel(shape)
             if line_color:
                 shape.line_color = QColor(*line_color)
@@ -560,7 +565,7 @@ class MainWindow(QMainWindow, WindowMixin):
         try:
             if self.usingPascalVocFormat is True:
                 print 'savePascalVocFormat save to:' + filename
-                lf.savePascalVocFormat(filename, shapes, unicode(self.filename), self.imageData,
+                lf.savePascalVocFormat(filename, shapes, unicode(self.filename), self.imageData,self.pose,
                     self.lineColor.getRgb(), self.fillColor.getRgb())
             else:
                 lf.save(filename, shapes, unicode(self.filename), self.imageData,
@@ -604,6 +609,9 @@ class MainWindow(QMainWindow, WindowMixin):
             self.labelDialog = LabelDialog(parent=self, listItem=self.labelHist)
         # text = self.labelDialog.popUp()
         # use default class
+        # get face pose info pitch, yaw, roll
+        self.pose = LabelDialog(parent=self).popUp()
+
         text = self.labelHist[0]
         if text is not None:
             self.addLabel(self.canvas.setLastLabel(text))
@@ -1148,6 +1156,7 @@ def main(argv):
     # 5、在画框的时候将输入角度信息
     # 6、显示框的坐标和长宽
     # 7、修改pascal读入读出的格式
+    #
 
     app = QApplication(argv)
     app.setApplicationName(__appname__)
